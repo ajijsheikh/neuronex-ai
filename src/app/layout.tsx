@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { FirebaseConfigWarning } from "@/components/FirebaseConfigWarning";
 import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
@@ -28,6 +29,7 @@ export default function RootLayout({
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} dark`} suppressHydrationWarning>
       <body className="min-h-screen bg-background text-foreground antialiased">
         <AuthProvider>
+          <FirebaseConfigWarning />
           {children}
           <Toaster position="bottom-right" theme="dark" />
         </AuthProvider>

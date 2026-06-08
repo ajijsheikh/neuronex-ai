@@ -8,14 +8,14 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function LandingPage() {
-  const { user, loading } = useAuth();
+  const { user, status } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (user) router.push("/dashboard");
-  }, [user, router]);
+    if (status === "authenticated" && user) router.push("/dashboard");
+  }, [status, user, router]);
 
-  if (loading || user) return null;
+  if (status === "loading" || status === "authenticated") return null;
 
   return (
     <div className="min-h-screen bg-background">

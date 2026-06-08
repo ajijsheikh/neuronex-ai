@@ -15,6 +15,7 @@ import {
   Search,
   User,
   ChevronRight,
+  Loader2,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -24,6 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -33,16 +35,81 @@ const navItems = [
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
+function SidebarSkeleton() {
+  return (
+    <aside className="hidden md:flex flex-col w-56 border-r border-sidebar-border bg-sidebar shrink-0">
+      <div className="flex items-center gap-2 px-4 h-14 border-b border-sidebar-border">
+        <Brain className="h-5 w-5 text-primary" />
+        <span className="font-semibold text-sm text-white">NEURONEX</span>
+      </div>
+      <div className="flex-1 p-3 space-y-2">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} className="h-9 w-full rounded-lg" />
+        ))}
+      </div>
+    </aside>
+  );
+}
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { user, loading, signOut } = useAuth();
+  const { user, status, signOut } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!loading && !user) router.push("/login");
-  }, [user, loading, router]);
+    if (status === "unauthenticated") router.push("/login");
+  }, [status, router]);
 
-  if (loading || !user) return null;
+  if (status === "loading") {
+    return (
+      <div className="flex h-screen overflow-hidden">
+        <SidebarSkeleton />
+        <div className="flex-1 flex flex-col">
+          <header className="h-14 border-b border-border bg-background/80" />
+          <main className="flex-1 p-6">
+            <div className="space-y-4 max-w-4xl mx-auto">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-4 w-72" />
+              <div className="grid sm:grid-cols-3 gap-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} className="h-24 rounded-xl" />
+                ))}
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === "unauthenticated") {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="text-center space-y-3">
+          <Brain className="h-10 w-10 text-muted-foreground/40 mx-auto" />
+          <p className="text-sm text-muted-foreground">Redirecting to login...</p>
+          <Loader2 className="h-4 w-4 animate-spin text-primary mx-auto" />
+        </div>
+      </div>
+    );
+  }
+
+  if (status === "error" || !user) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background p-4">
+        <div className="text-center space-y-3 max-w-sm">
+          <div className="h-10 w-10 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
+            <LogOut className="h-4 w-4 text-destructive" />
+          </div>
+          <p className="text-sm font-medium">Authentication Error</p>
+          <p className="text-xs text-muted-foreground">Unable to authenticate. Please try signing in again.</p>
+          <Button size="sm" className="text-xs" onClick={() => router.push("/login")}>
+            Return to Login
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const currentPage = navItems.find((item) => pathname === item.href);
 
@@ -103,10 +170,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="flex items-center gap-3">
             <div className="hidden sm:relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-              <Input
-                placeholder="Search..."
-                className="pl-8 h-8 w-48 text-xs bg-muted border-none rounded-lg"
-              />
+              <Input placeholder="Search..." className="pl-8 h-8 w-48 text-xs bg-muted border-none rounded-lg" />
             </div>
 
             <DropdownMenu>
