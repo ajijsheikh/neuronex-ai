@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NEURONEX - Your Second Brain",
+  title: "NEURONEX — Your Second Brain",
   description: "Transform scattered information into connected intelligence",
 };
 
@@ -25,11 +25,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`} suppressHydrationWarning>
-      <body className="min-h-full flex flex-col">
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} dark`} suppressHydrationWarning>
+      <body className="min-h-screen bg-background text-foreground antialiased">
         <AuthProvider>
           {children}
-          <Toaster />
+          <Toaster position="bottom-right" theme="dark" />
         </AuthProvider>
       </body>
     </html>

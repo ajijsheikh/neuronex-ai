@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Brain, Share2, MessageCircle } from "lucide-react";
+import { Brain, Sparkles, Share2, MessageCircle, Upload, ArrowRight, Check } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -15,90 +15,138 @@ export default function LandingPage() {
     if (user) router.push("/dashboard");
   }, [user, router]);
 
-  if (loading) return null;
-  if (user) return null;
+  if (loading || user) return null;
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <header className="flex items-center justify-between px-6 py-4 border-b border-border">
-        <div className="flex items-center gap-2 font-bold text-xl">
-          <Brain className="h-6 w-6 text-primary" />
-          NEURONEX
-        </div>
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" render={<Link href="/login" />}>
-            Sign In
-          </Button>
-          <Button render={<Link href="/register" />}>
-            Get Started
-          </Button>
+    <div className="min-h-screen bg-background">
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 font-semibold">
+            <Brain className="h-5 w-5 text-primary" />
+            <span className="text-sm">NEURONEX</span>
+          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/login" className="text-xs text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-lg hover:bg-muted">Sign In</Link>
+            <Button size="sm" className="text-xs h-8" render={<Link href="/register" />}>
+              Get Started
+            </Button>
+          </div>
         </div>
       </header>
 
-      <main className="flex-1">
-        <section className="max-w-5xl mx-auto px-6 pt-24 pb-16 text-center">
-          <h1 className="text-5xl font-bold tracking-tight mb-4">
-            Your Second Brain.
-            <br />
-            <span className="text-primary">Automatically Organized.</span>
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-            NEURONEX transforms your scattered PDFs and notes into an interconnected
-            knowledge graph. Upload anything, and let AI build a searchable, conversational
-            web of your mind.
-          </p>
-          <div className="flex items-center justify-center gap-4">
-            <Button size="lg" render={<Link href="/register" />}>
-              Start Building Your Brain
-            </Button>
+      <main>
+        <section className="relative pt-32 pb-20 px-4 sm:px-6 overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent pointer-events-none" />
+          <div className="max-w-5xl mx-auto text-center relative">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-border bg-muted text-xs text-muted-foreground mb-6">
+              <Sparkles className="h-3 w-3 text-primary" />
+              AI-Powered Knowledge OS
+            </div>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-4">
+              Transform Scattered Information into{" "}
+              <span className="gradient-text">Connected Intelligence</span>
+            </h1>
+            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-8 leading-relaxed">
+              NEURONEX automatically builds an interactive knowledge graph from your documents.
+              Upload anything — PDFs, notes, code — and let AI connect the dots.
+            </p>
+            <div className="flex items-center justify-center gap-3">
+              <Button size="lg" className="h-10 text-sm gap-2" render={<Link href="/register" />}>
+                Start Building Your Brain
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+              <Link href="/login" className="inline-flex items-center justify-center h-10 px-4 text-sm rounded-lg border border-border bg-background hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">Watch Demo</Link>
+            </div>
+
+            <div className="mt-16 relative">
+              <div className="rounded-xl border border-border bg-card p-4 sm:p-6 glow">
+                <div className="aspect-video rounded-lg bg-gradient-to-br from-primary/10 via-secondary to-background flex items-center justify-center">
+                  <div className="text-center">
+                    <Brain className="h-12 w-12 text-primary/50 mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">Interactive Knowledge Graph Preview</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
-        <section className="max-w-5xl mx-auto px-6 py-16">
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="flex flex-col items-center text-center p-6 rounded-lg border border-border">
-              <UploadIcon className="h-10 w-10 text-primary mb-4" />
-              <h3 className="font-semibold mb-2">Zero-Friction Ingestion</h3>
-              <p className="text-sm text-muted-foreground">Drag and drop PDFs. AI automatically extracts and structures your knowledge.</p>
+        <section className="py-20 px-4 sm:px-6 border-t border-border">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-3">Everything you need to organize knowledge</h2>
+              <p className="text-muted-foreground text-sm">One platform to upload, understand, connect, and discover.</p>
             </div>
-            <div className="flex flex-col items-center text-center p-6 rounded-lg border border-border">
-              <Share2 className="h-10 w-10 text-primary mb-4" />
-              <h3 className="font-semibold mb-2">Auto-Linking Graph</h3>
-              <p className="text-sm text-muted-foreground">Watch your knowledge graph build itself as entities and connections are discovered.</p>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { icon: Upload, title: "Smart Ingestion", desc: "Drag-drop PDFs, images, and notes. AI extracts text and structure automatically." },
+                { icon: Brain, title: "AI Understanding", desc: "Gemini AI summarizes, extracts entities, and generates embeddings for every document." },
+                { icon: Share2, title: "Auto-Linking Graph", desc: "Watch your knowledge graph build itself as entities and relationships are discovered." },
+                { icon: MessageCircle, title: "Conversational Search", desc: "Ask questions in plain English. Get answers with citations to your sources." },
+              ].map((f) => {
+                const Icon = f.icon;
+                return (
+                  <div key={f.title} className="card-hover rounded-xl border border-border bg-card p-5">
+                    <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
+                      <Icon className="h-4 w-4 text-primary" />
+                    </div>
+                    <h3 className="text-sm font-semibold mb-1.5">{f.title}</h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
+                  </div>
+                );
+              })}
             </div>
-            <div className="flex flex-col items-center text-center p-6 rounded-lg border border-border">
-              <MessageCircle className="h-10 w-10 text-primary mb-4" />
-              <h3 className="font-semibold mb-2">AI Conversational Search</h3>
-              <p className="text-sm text-muted-foreground">Ask questions and get answers synthesized from your documents with citations.</p>
+          </div>
+        </section>
+
+        <section className="py-20 px-4 sm:px-6 border-t border-border">
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-3">How It Works</h2>
+              <p className="text-muted-foreground text-sm">Four simple steps to your second brain.</p>
             </div>
+            <div className="space-y-6">
+              {[
+                { step: "01", title: "Upload", desc: "Drop your PDFs, notes, or any document. We support multiple formats with bulk upload.", icon: Upload },
+                { step: "02", title: "Understand", desc: "Gemini AI extracts text, identifies key entities, and generates vector embeddings for semantic search.", icon: Brain },
+                { step: "03", title: "Connect", desc: "Entities are automatically linked into a knowledge graph. Watch relationships form between concepts.", icon: Share2 },
+                { step: "04", title: "Discover", desc: "Ask questions, explore the graph, and uncover insights you never knew were hidden in your documents.", icon: Sparkles },
+              ].map((f) => {
+                const Icon = f.icon;
+                return (
+                  <div key={f.step} className="flex gap-4 sm:gap-6 items-start">
+                    <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                      <Icon className="h-4 w-4 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[10px] font-mono text-primary font-medium">{f.step}</span>
+                        <h3 className="text-sm font-semibold">{f.title}</h3>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{f.desc}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section className="py-20 px-4 sm:px-6 border-t border-border text-center">
+          <div className="max-w-2xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-3">Ready to build your second brain?</h2>
+            <p className="text-sm text-muted-foreground mb-6">Join NEURONEX and transform how you manage knowledge.</p>
+            <Button size="lg" className="h-10 text-sm gap-2" render={<Link href="/register" />}>
+                Get Started Free
+                <ArrowRight className="h-4 w-4" />
+              </Button>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-border py-6 text-center text-sm text-muted-foreground">
-        NEURONEX &mdash; Transform Scattered Information into Connected Intelligence
+      <footer className="border-t border-border py-6 px-4 sm:px-6 text-center text-xs text-muted-foreground">
+        NEURONEX — Transform Scattered Information into Connected Intelligence
       </footer>
     </div>
-  );
-}
-
-function UploadIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-      <polyline points="17 8 12 3 7 8" />
-      <line x1="12" x2="12" y1="3" y2="15" />
-    </svg>
   );
 }
