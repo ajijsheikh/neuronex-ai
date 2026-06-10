@@ -1,35 +1,39 @@
 # NEURONEX Product Vision
 
 ## 1. Executive Summary
-**NEURONEX** is a Personal Knowledge Operating System that automatically transforms scattered information into a dynamic, interactive knowledge graph. By leveraging Google Gemini and LangChain, NEURONEX eliminates the manual labor of organizing notes, tagging files, and building wikis. It acts as an autonomous "second brain" that ingests, connects, and retrieves information semantically.
+**NEURONEX** is transitioning from an AI-powered Knowledge Graph utility into an **Active AI Personal Learning Companion**. By leveraging Google Gemini and LangChain, NEURONEX not only ingests, connects, and structures scattered information, but actively improves the user's knowledge, memory, problem-solving ability, career readiness, and long-term growth.
 
 ## 2. Problem Statement
-The modern knowledge worker and student suffer from **Information Fragmentation**. Data is siloed across PDFs, local folders, browser bookmarks, and various note-taking apps. The cognitive load required to manually organize, tag, and link this information is unsustainable. When insights are needed, retrieving them requires exact keyword matches or remembering where a file was saved, leading to duplicated effort, lost knowledge, and siloed thinking.
+The modern knowledge worker and student suffer from two compounding problems:
+1. **Information Fragmentation:** Data is siloed across PDFs, local folders, browser bookmarks, and various note-taking apps. 
+2. **Passive Consumption:** Existing tools (Notion, Obsidian, Coursera) offer static storage or static content. Passive reading gives a false sense of competence, leaving users unable to actively apply concepts or prove mastery when it counts (exams, interviews, projects).
 
 ## 3. The Solution
-NEURONEX replaces folders and tags with an **Automated Knowledge Graph**. Users simply upload content. The AI extracts entities, determines relationships, creates vector embeddings, and builds a living web of knowledge. Users can visually explore their data in 2D or 3D spaces, or chat with their entire personal knowledge base to synthesize ideas.
+NEURONEX provides **Stateful, Proactive Competency Building**.
+- **Phase 1 (The Second Brain):** You input chaos; NEURONEX outputs structured, interconnected intelligence (Knowledge Graph, RAG Chat, Flashcards).
+- **Phase 2 (The Learning Companion):** NEURONEX actively tests you, builds projects for you, assesses your career readiness against job descriptions, and acts as a Daily Mentor. It knows what you read yesterday, tests you on it today, and aligns it with your career goals tomorrow.
 
 ## 4. Target Audience
-*   **Researchers & Academics:** Synthesizing hundreds of papers, finding connections between disparate studies.
-*   **Developers & Engineers:** Managing technical documentation, snippets, and architectural decisions.
-*   **Lifelong Learners & Students:** Connecting concepts across different subjects, building a permanent learning repository.
-*   **Content Creators:** Organizing research, quotes, and ideas for writing and production.
+*   **Students & Lifelong Learners:** Needing active learning tools like AI Exam Simulators, Memory Enhancement, and automated study plans.
+*   **Researchers & Academics:** Synthesizing hundreds of papers, finding gaps in literature via the AI Research Partner.
+*   **Developers & Engineers:** Generating coding challenges from documentation, comparing frameworks via the Concept Comparison Engine.
+*   **Professionals & Job Seekers:** Identifying skill gaps and generating roadmaps via the AI Career Coach and Reverse Learning Engine.
 
 ## 5. Unique Value Proposition (UVP)
-**Zero-Friction Knowledge Management.** While Notion requires you to build databases and Obsidian requires you to manually link Markdown files, NEURONEX does the organizing for you. You input chaos; NEURONEX outputs structured, interconnected intelligence.
+**Zero-Friction Active Learning.** While other platforms require you to manually build databases, create flashcards, or search for relevant courses, NEURONEX does it all automatically. Your personal data is the curriculum.
 
 ## 6. Competitive Analysis
-| Feature | Notion | Obsidian | NotebookLM | NEURONEX |
+| Feature | Notion / Obsidian | Coursera / Udemy | ChatGPT / Claude | NEURONEX |
 | :--- | :--- | :--- | :--- | :--- |
-| **Paradigm** | Block-based Workspace | Local Markdown PKM | Document-grounded AI | AI-Generated Graph |
-| **Organization** | Manual (Databases) | Manual (Tags/Links) | Manual (Notebooks) | **Fully Automated** |
-| **Retrieval** | Keyword Search / AI | Keyword Search / Graph | Semantic RAG | **Semantic RAG + Graph** |
-| **Visual Graph** | None | 2D (Manual links) | None | **2D & 3D (Auto links)** |
-| **Friction** | High | High | Low | **Zero** |
+| **Paradigm** | Static Workspace | Static Curriculum | Stateless Chat | **Proactive Companion** |
+| **Organization** | Manual | Pre-defined | None | **AI Knowledge Graph** |
+| **Curriculum** | None | Generalized | Generalized | **Personalized to User Data** |
+| **Testing** | None | Generalized Quizzes| Manual Prompting | **Auto-Generated Exams/Projects** |
+| **Mentorship** | None | None | Manual Prompting | **Daily AI Mentor & Career Coach** |
 
 ## 7. Success Metrics (KPIs)
-*   **Activation Rate:** % of users who upload >3 documents in their first session.
-*   **Engagement (Graph):** Average time spent interacting with the graph visualizer per session.
-*   **Engagement (Chat):** Average number of RAG queries per user per day.
-*   **Retention:** D7 and D30 active users.
-*   **Processing Success:** % of documents successfully parsed and graphed without pipeline failure.
+*   **Activation Rate:** % of users who upload >3 documents and complete 1 Active Learning exercise in their first session.
+*   **Engagement (Testing):** Number of mock exams and coding challenges completed per user per week.
+*   **Engagement (Mentorship):** % of users completing their Daily Mentor tasks.
+*   **Retention:** D7, D30, and D90 active users.
+*   **Knowledge Growth:** Average increase in the Knowledge Health Score per month.

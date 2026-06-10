@@ -1,32 +1,22 @@
-# Implementation Roadmap (MVP to V3)
+# Implementation Roadmap (Phase 2 Expansion)
 
-## Phase 1: MVP (Months 1-3)
-*Status: Defined in the Sprint Plan.*
-*   **Focus:** Prove the core loop: Upload -> Auto-Graph -> Chat.
-*   **Key Deliverables:**
-    *   PDF/TXT Upload.
-    *   Gemini-powered Entity/Relationship Extraction.
-    *   PostgreSQL + pgvector storage.
-    *   2D React Flow Graph.
-    *   RAG Chat with Citations.
+## Phase 2 MVP (Quick Wins - Month 1)
+*Focus: High-impact features with low architectural overhead.*
+*   **Concept Comparison Engine**: Side-by-side tables and pros/cons generation.
+*   **AI Whiteboard Teacher**: Mermaid.js integration for flowcharts and architecture diagrams.
+*   **Memory Enhancement System**: Mnemonic and memory palace generation for flashcards.
 
-## Phase 2: Knowledge Expansion & Sync (Months 4-6)
-*   **Focus:** Making ingestion ubiquitous and frictionless.
-*   **Key Deliverables:**
-    *   **Browser Extension:** "Clip to NEURONEX". Extracts main article text from URLs and injects into the graph.
-    *   **Image/Screenshot Support:** OCR integration. Users can drop images of whiteboards, and the text is extracted and graphed.
-    *   **Notion/Obsidian Importer:** Bulk ingest existing PKM systems.
-    *   **Graph Editing:** UI controls to manually merge nodes, delete edges, or create custom connections (overriding AI mistakes).
+## Phase 2 V1 (Core Platform Expansion - Months 2-3)
+*Focus: Establishing the Active Learning and Mentorship paradigm.*
+*   **Active Learning System**: Coding challenges, debugging, and case studies generated from notes.
+*   **AI Exam Simulator**: Timed mock exams with automatic grading and weakness analysis.
+*   **Daily AI Mentor**: Cron-based personalized daily study plans and briefings.
+*   **Knowledge to Project Generator**: Converting theoretical notes into actionable project roadmaps.
+*   **Learning Analytics Dashboard**: Visualizing learning velocity and retention trends.
 
-## Phase 3: Analytics & 3D Immersion (Months 7-9)
-*   **Focus:** Visual wow-factor and deeper insights.
-*   **Key Deliverables:**
-    *   **3D React Three Fiber View:** A toggle to fly through the knowledge graph in 3D space.
-    *   **Knowledge Timeline:** A slider at the bottom of the screen to see how the graph evolved over time (e.g., "Show my graph from 2024").
-    *   **Recommendation Engine:** "Because you clicked 'Machine Learning', you should review these 3 disconnected notes."
-
-## Phase 4: Autonomous Agents (V3+)
-*   **Focus:** Proactive knowledge management.
-*   **Key Deliverables:**
-    *   **Knowledge Gap Detection:** The AI identifies clusters of information and proactively suggests web articles or books to fill missing foundational knowledge.
-    *   **Auto-Synthesis:** Overnight, the system generates "Review Briefs" summarizing new connections found between yesterday's uploads and data from 2 years ago.
+## Phase 2 V2 (Advanced Intelligence - Months 4-6)
+*Focus: Proactive career guidance and deep research capabilities.*
+*   **Reverse Learning Engine**: "Goal -> Prerequisite -> Gap Analysis" roadmap generation.
+*   **Knowledge DNA System**: Adaptive profiling of learning styles (Visual/Audio, strengths/weaknesses).
+*   **AI Career Coach**: Job description matching, career readiness scoring, and missing skills identification.
+*   **AI Research Partner**: Cross-document literature gap analysis and open problem identification.

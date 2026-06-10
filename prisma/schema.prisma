@@ -1,11 +1,15 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [vector]
 }
+
+// ─── CORE MODELS (Existing) ─────────────────────────────────
 
 model User {
   id        String   @id
@@ -15,8 +19,34 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  documents Document[]
-  entities  Entity[]
+  // Existing relations
+  documents     Document[]
+  entities      Entity[]
+
+  // Study features
+  studyNotes    StudyNote[]
+  summaries     Summary[]
+  quizzes       Quiz[]
+  quizAttempts  QuizAttempt[]
+  flashcardDecks FlashcardDeck[]
+  flashcards    Flashcard[]
+  flashcardReviews FlashcardReview[]
+  tutorSessions TutorSession[]
+  revisionSheets RevisionSheet[]
+  mindMaps      MindMap[]
+
+  // Memory & knowledge
+  conceptMemories ConceptMemory[]
+  knowledgeHealth KnowledgeHealth?
+  learningPaths   LearningPath[]
+
+  // Engagement
+  activities    UserActivity[]
+  streak        UserStreak?
+  achievements  Achievement[]
+
+  // Audio
+  podcasts      Podcast[]
 }
 
 model Document {
@@ -32,15 +62,25 @@ model Document {
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   chunks        Chunk[]
   relationships Relationship[]
+
+  // New relations
+  studyNotes     StudyNote[]
+  summaries      Summary[]
+  quizzes        Quiz[]
+  flashcards     Flashcard[]
+  tutorSessions  TutorSession[]
+  revisionSheets RevisionSheet[]
+  mindMaps       MindMap[]
+  podcasts       Podcast[]
 }
 
 model Chunk {
-  id         String   @id @default(cuid())
+  id         String                 @id @default(cuid())
   documentId String
   content    String
   embedding  Unsupported("vector(1536)")?
   pageNumber Int?
-  createdAt  DateTime @default(now())
+  createdAt  DateTime               @default(now())
 
   document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
 }
@@ -52,9 +92,10 @@ model Entity {
   type      String   @default("Concept")
   createdAt DateTime @default(now())
 
-  user               User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sourceRelationships Relationship[] @relation("SourceEntity")
-  targetRelationships Relationship[] @relation("TargetEntity")
+  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sourceRelationships Relationship[]  @relation("SourceEntity")
+  targetRelationships Relationship[]  @relation("TargetEntity")
+  conceptMemories     ConceptMemory[]
 
   @@unique([userId, name])
 }
@@ -70,4 +111,295 @@ model Relationship {
   sourceEntity Entity    @relation("SourceEntity", fields: [sourceEntityId], references: [id], onDelete: Cascade)
   targetEntity Entity    @relation("TargetEntity", fields: [targetEntityId], references: [id], onDelete: Cascade)
   document     Document? @relation(fields: [documentId], references: [id], onDelete: SetNull)
+}
+
+// ─── STUDY NOTES ─────────────────────────────────────────────
+
+model StudyNote {
+  id         String   @id @default(cuid())
+  userId     String
+  documentId String
+  level      String   // beginner, intermediate, advanced, exam, research
+  title      String
+  content    String   // Markdown content
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, level])
+}
+
+// ─── SUMMARIES ───────────────────────────────────────────────
+
+model Summary {
+  id         String   @id @default(cuid())
+  userId     String
+  documentId String
+  type       String   // "30sec", "2min", "5min", "executive", "exam"
+  content    String
+  createdAt  DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, type])
+}
+
+// ─── QUIZ SYSTEM ─────────────────────────────────────────────
+
+model Quiz {
+  id         String   @id @default(cuid())
+  userId     String
+  documentId String?
+  title      String
+  difficulty String   // easy, medium, hard, expert
+  questionCount Int   @default(10)
+  createdAt  DateTime @default(now())
+
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  document  Document?      @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  questions QuizQuestion[]
+  attempts  QuizAttempt[]
+}
+
+model QuizQuestion {
+  id            String  @id @default(cuid())
+  quizId        String
+  type          String  // mcq, true_false, fill_blank, short_answer
+  question      String
+  options       Json?   // For MCQ: ["A", "B", "C", "D"]
+  correctAnswer String
+  explanation   String?
+  difficulty    String
+  conceptTag    String?
+
+  quiz    Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  answers QuizAnswer[]
+}
+
+model QuizAttempt {
+  id          String   @id @default(cuid())
+  quizId      String
+  userId      String
+  score       Float
+  totalPoints Int
+  timeTaken   Int?     // seconds
+  completedAt DateTime @default(now())
+
+  quiz    Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers QuizAnswer[]
+}
+
+model QuizAnswer {
+  id         String  @id @default(cuid())
+  attemptId  String
+  questionId String
+  userAnswer String
+  isCorrect  Boolean
+  aiFeedback String?
+
+  attempt  QuizAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+// ─── FLASHCARD + SRS SYSTEM ──────────────────────────────────
+
+model FlashcardDeck {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  flashcards Flashcard[]
+}
+
+model Flashcard {
+  id         String   @id @default(cuid())
+  userId     String
+  documentId String?
+  deckId     String
+  front      String
+  back       String
+  conceptTag String?
+  createdAt  DateTime @default(now())
+
+  // SM-2 SRS fields
+  easeFactor   Float    @default(2.5)
+  interval     Int      @default(0)    // days until next review
+  repetitions  Int      @default(0)    // successful review count
+  nextReviewAt DateTime @default(now())
+  lastReviewAt DateTime?
+
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  document Document?       @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  deck     FlashcardDeck   @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  reviews  FlashcardReview[]
+}
+
+model FlashcardReview {
+  id          String   @id @default(cuid())
+  flashcardId String
+  userId      String
+  rating      Int      // 0=Again, 1=Hard, 2=Good, 3=Easy
+  reviewedAt  DateTime @default(now())
+
+  flashcard Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── AI TUTOR ────────────────────────────────────────────────
+
+model TutorSession {
+  id          String    @id @default(cuid())
+  userId      String
+  documentId  String?
+  topic       String
+  messages    Json      // Array of {role, content, timestamp}
+  weakConcepts Json?    // ["concept1", "concept2"]
+  status      String    @default("active") // active, completed
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  document Document? @relation(fields: [documentId], references: [id], onDelete: SetNull)
+}
+
+// ─── REVISION SHEETS ─────────────────────────────────────────
+
+model RevisionSheet {
+  id         String   @id @default(cuid())
+  userId     String
+  documentId String?
+  type       String   // formulas, definitions, concepts, cheatsheet, lastminute
+  title      String
+  content    String   // Markdown content
+  createdAt  DateTime @default(now())
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  document Document? @relation(fields: [documentId], references: [id], onDelete: SetNull)
+}
+
+// ─── MIND MAPS ───────────────────────────────────────────────
+
+model MindMap {
+  id         String   @id @default(cuid())
+  userId     String
+  documentId String?
+  title      String
+  structure  Json     // Hierarchical tree structure
+  layout     Json?    // Node positions for manual arrangements
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  document Document? @relation(fields: [documentId], references: [id], onDelete: SetNull)
+}
+
+// ─── MEMORY & RETENTION ─────────────────────────────────────
+
+model ConceptMemory {
+  id              String    @id @default(cuid())
+  userId          String
+  conceptName     String
+  entityId        String?
+  stability       Float     @default(1.0)  // Memory stability factor
+  retention       Float     @default(1.0)  // Current retention (0-1)
+  confidenceLevel String    @default("learning") // mastered, learning, needs_review
+  reviewCount     Int       @default(0)
+  lastReviewAt    DateTime?
+  nextReviewAt    DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entity Entity? @relation(fields: [entityId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, conceptName])
+}
+
+model KnowledgeHealth {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  overallScore     Float    @default(0)
+  coverageScore    Float    @default(0)
+  retentionScore   Float    @default(0)
+  depthScore       Float    @default(0)
+  consistencyScore Float    @default(0)
+  gaps             Json?    // Knowledge gap analysis results
+  calculatedAt     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── LEARNING PATHS ──────────────────────────────────────────
+
+model LearningPath {
+  id        String   @id @default(cuid())
+  userId    String
+  goal      String
+  roadmap   Json     // Structured roadmap
+  progress  Json?    // Checked-off items
+  status    String   @default("active") // active, completed, paused
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── PODCASTS (AUDIO LEARNING) ───────────────────────────────
+
+model Podcast {
+  id         String   @id @default(cuid())
+  userId     String
+  documentId String
+  title      String
+  style      String   // solo, discussion, interview
+  script     Json     // Speaker turns
+  audioUrl   String?  // Firebase Storage URL
+  duration   Int?     // seconds
+  status     String   @default("generating") // generating, ready, failed
+  createdAt  DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+}
+
+// ─── ENGAGEMENT & GAMIFICATION ──────────────────────────────
+
+model UserActivity {
+  id       String   @id @default(cuid())
+  userId   String
+  type     String   // quiz, flashcard, upload, tutor, login, study_note, revision
+  metadata Json?
+  date     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+}
+
+model UserStreak {
+  id             String    @id @default(cuid())
+  userId         String    @unique
+  currentStreak  Int       @default(0)
+  longestStreak  Int       @default(0)
+  lastActiveDate DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Achievement {
+  id       String   @id @default(cuid())
+  userId   String
+  type     String   // streak_7, streak_30, first_quiz_ace, knowledge_explorer, etc.
+  earnedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type])
 }

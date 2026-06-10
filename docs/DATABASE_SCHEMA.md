@@ -1,101 +1,54 @@
 # Database Schema
 
 Database: **PostgreSQL** with **pgvector** extension.
-ORM/Query Builder: **Prisma** or **Drizzle**.
+ORM: **Prisma**.
 
-## 1. Schema Diagram
+## 1. Core Models (Phase 1)
+*   **User**: `id`, `email`, `name`
+*   **Document**: `id`, `userId`, `title`, `type`, `sourceUrl`
+*   **Chunk**: `id`, `documentId`, `content`, `embedding (vector)`, `pageNumber`
+*   **Entity** (Graph Node): `id`, `userId`, `name`, `type`
+*   **Relationship** (Graph Edge): `id`, `sourceEntityId`, `targetEntityId`, `relationshipType`
 
-```mermaid
-erDiagram
-    USERS ||--o{ DOCUMENTS : "owns"
-    USERS ||--o{ ENTITIES : "owns"
-    DOCUMENTS ||--o{ CHUNKS : "contains"
-    DOCUMENTS ||--o{ RELATIONSHIPS : "source of"
-    ENTITIES ||--o{ RELATIONSHIPS : "source"
-    ENTITIES ||--o{ RELATIONSHIPS : "target"
+## 2. Study & Memory Models (Phase 1.5)
+*   **StudyNote** / **Summary**: AI-generated static content.
+*   **Quiz** / **QuizQuestion** / **QuizAttempt** / **QuizAnswer**: Core testing framework.
+*   **FlashcardDeck** / **Flashcard** / **FlashcardReview**: Spaced Repetition System (SM-2).
+*   **ConceptMemory**: Ebbinghaus forgetting curve tracking (`stability`, `retention`, `confidenceLevel`).
+*   **KnowledgeHealth**: Aggregated competency scores.
 
-    USERS {
-        uuid id PK
-        string email
-        string display_name
-        timestamp created_at
-    }
-    
-    DOCUMENTS {
-        uuid id PK
-        uuid user_id FK
-        string title
-        string file_path
-        string file_type
-        timestamp created_at
-    }
+## 3. Active Learning & Expansion Models (Phase 2)
 
-    CHUNKS {
-        uuid id PK
-        uuid document_id FK
-        text content
-        vector embedding
-        int page_number
-    }
+### Table: `ActiveExercise`
+Tracks generated practical challenges.
+*   `id`, `userId`, `documentId`
+*   `type` (coding, debugging, numerical, case_study)
+*   `problem` (TEXT), `solution` (TEXT)
+*   `difficulty` (INT)
 
-    ENTITIES {
-        uuid id PK
-        uuid user_id FK
-        string name
-        string type
-        string description
-    }
+### Table: `ExamSimulation`
+Tracks full mock exams.
+*   `id`, `userId`, `title`, `durationMin`
+*   `questions` (JSON), `score` (FLOAT), `report` (JSON)
 
-    RELATIONSHIPS {
-        uuid id PK
-        uuid source_entity_id FK
-        uuid target_entity_id FK
-        uuid document_id FK
-        string relation_type
-        float weight
-    }
-```
+### Table: `GeneratedProject`
+Tracks theory-to-practice projects.
+*   `id`, `userId`, `title`, `description`
+*   `milestones` (JSON), `skillsUsed` (String[])
 
-## 2. Table Definitions
+### Table: `KnowledgeDNA`
+Tracks adaptive learning profiles.
+*   `id`, `userId`
+*   `preferredModality` (String), `optimalTimeOfDay` (String)
+*   `strengths` (String[]), `weaknesses` (String[])
 
-### Table: `users`
-Tracks authenticated users. Synced from Firebase Auth.
-*   `id` (UUID, Primary Key) - Matches Firebase UID.
-*   `email` (VARCHAR, Unique)
-*   `created_at` (TIMESTAMP, Default: NOW)
+### Table: `CareerProfile`
+Tracks AI Career Coach data.
+*   `id`, `userId`
+*   `targetRoles` (String[])
+*   `readinessHistory` (JSON - tracks score over time)
 
-### Table: `documents`
-Metadata for uploaded files.
-*   `id` (UUID, Primary Key)
-*   `user_id` (UUID, Foreign Key -> users.id)
-*   `title` (VARCHAR) - Extracted from filename or AI.
-*   `file_url` (VARCHAR) - Firebase Storage URL.
-*   `created_at` (TIMESTAMP)
-
-### Table: `chunks`
-Holds the actual text data and vector embeddings for semantic search (RAG).
-*   `id` (UUID, Primary Key)
-*   `document_id` (UUID, Foreign Key -> documents.id)
-*   `content` (TEXT) - The raw chunked text.
-*   `embedding` (VECTOR) - `pgvector` column (dimensions depend on Gemini embedding model, e.g., 768).
-*   `page_number` (INT, Nullable) - For citations.
-
-### Table: `entities` (Graph Nodes)
-The concepts extracted by AI.
-*   `id` (UUID, Primary Key)
-*   `user_id` (UUID, Foreign Key -> users.id) - Ensures row-level security.
-*   `name` (VARCHAR) - e.g., "Alan Turing", "Neural Networks".
-*   `type` (VARCHAR) - e.g., "Person", "Technology", "Concept".
-
-### Table: `relationships` (Graph Edges)
-The edges connecting entities.
-*   `id` (UUID, Primary Key)
-*   `source_entity_id` (UUID, Foreign Key -> entities.id)
-*   `target_entity_id` (UUID, Foreign Key -> entities.id)
-*   `document_id` (UUID, Foreign Key -> documents.id) - The document where this relationship was discovered.
-*   `relation_type` (VARCHAR) - e.g., "invented", "is related to".
-
-## 3. Required Indexes
-*   **Vector Index:** Create an HNSW (Hierarchical Navigable Small World) index on `chunks.embedding` for fast similarity search.
-    *   `CREATE INDEX ON chunks USING hnsw (embedding vector_cosine_ops);`
-*   **Foreign Keys:** Indexes on all foreign key columns (`user_id`, `document_id`, `source_entity_id`, `target_entity_id`) to speed up JOINs and Graph traversal.
+### Table: `DailyMentorBriefing`
+Tracks daily generated plans.
+*   `id`, `userId`, `date`
+*   `content` (TEXT), `tasks` (JSON), `isRead` (Boolean)
