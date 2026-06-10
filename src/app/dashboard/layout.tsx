@@ -4,9 +4,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
-  Upload,
   Share2,
   MessageCircle,
   Settings,
@@ -16,6 +16,13 @@ import {
   User,
   ChevronRight,
   Loader2,
+  BookOpen,
+  FileText,
+  Layers,
+  Network,
+  Activity,
+  AlertTriangle,
+  Map,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -29,9 +36,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/upload", label: "Upload", icon: Upload },
+  { href: "/dashboard/study-notes", label: "Study Notes", icon: BookOpen },
+  { href: "/dashboard/summaries", label: "Summaries", icon: FileText },
+  { href: "/dashboard/quiz", label: "Quiz Simulator", icon: Brain },
+  { href: "/dashboard/flashcards", label: "Flashcards", icon: Layers },
   { href: "/dashboard/graph", label: "Knowledge Graph", icon: Share2 },
-  { href: "/dashboard/chat", label: "AI Chat", icon: MessageCircle },
+  { href: "/dashboard/mindmap", label: "Mind Map", icon: Network },
+  { href: "/dashboard/tutor", label: "AI Tutor", icon: MessageCircle },
+  { href: "/dashboard/health", label: "Knowledge Health", icon: Activity },
+  { href: "/dashboard/gaps", label: "Gap Detection", icon: AlertTriangle },
+  { href: "/dashboard/path", label: "Learning Path", icon: Map },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
@@ -190,8 +204,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto">
-          {children}
+        <main className="flex-1 overflow-y-auto relative bg-zinc-950 text-zinc-50">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="h-full"
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
 

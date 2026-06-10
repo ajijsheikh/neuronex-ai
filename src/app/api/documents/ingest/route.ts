@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { parsePDF, chunkText } from "@/lib/pdf";
-import { generateEmbedding, extractEntities, summarizeDocument } from "@/lib/ai";
+import { generateEmbedding, extractEntities } from "@/lib/ai";
 import { verifyFirebaseToken, extractBearerToken } from "@/lib/verify-token";
 
 export async function POST(req: Request) {

@@ -129,3 +129,15 @@
   content: '';
   @apply absolute left-0 w-0.5 h-5 bg-primary rounded-r-full;
 }
+
+/* 3D Utilities for Flashcards */
+.perspective-1000 {
+  perspective: 1000px;
+}
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
