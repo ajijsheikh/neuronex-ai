@@ -1,12 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-const model = genAI.getGenerativeModel({
-  model: "gemini-2.0-flash",
-  generationConfig: {
-    responseMimeType: "application/json",
-  },
-});
+import { getJsonModel, getChatModel, withRetry, withTimeout } from "@/lib/ai/client";
 
 export type QuestionType = "mcq" | "true_false" | "fill_blank" | "short_answer";
 export type DifficultyLevel = "easy" | "medium" | "hard" | "expert";
@@ -14,7 +6,7 @@ export type DifficultyLevel = "easy" | "medium" | "hard" | "expert";
 export interface GeneratedQuestion {
   type: QuestionType;
   question: string;
-  options: string[] | null; // For MCQ only
+  options: string[] | null;
   correctAnswer: string;
   explanation: string;
   difficulty: string;
@@ -76,13 +68,15 @@ Output strictly as JSON matching this schema:
   ]
 }`;
 
-  const result = await model.generateContent(prompt);
+  const result = await withRetry(
+    () => withTimeout(getJsonModel().generateContent(prompt), "generateQuiz"),
+    "generateQuiz"
+  );
   const text = result.response.text();
 
   try {
     return JSON.parse(text) as QuizGenerationResult;
   } catch {
-    // Fallback: try to extract JSON from the response
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       return JSON.parse(jsonMatch[0]) as QuizGenerationResult;
@@ -91,21 +85,11 @@ Output strictly as JSON matching this schema:
   }
 }
 
-/**
- * Grade a short answer question using AI comparison.
- */
 export async function gradeShortAnswer(
   question: string,
   correctAnswer: string,
   userAnswer: string
 ): Promise<{ isCorrect: boolean; feedback: string; score: number }> {
-  const gradingModel = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
-    generationConfig: {
-      responseMimeType: "application/json",
-    },
-  });
-
   const prompt = `You are grading a student's short answer. Compare their answer to the correct answer.
 
 Question: ${question}
@@ -120,7 +104,10 @@ Output strictly as JSON:
   "feedback": "Brief constructive feedback explaining what was right/wrong"
 }`;
 
-  const result = await gradingModel.generateContent(prompt);
+  const result = await withRetry(
+    () => withTimeout(getChatModel().generateContent(prompt), "gradeShortAnswer"),
+    "gradeShortAnswer"
+  );
   const text = result.response.text();
   return JSON.parse(text);
 }

@@ -20,12 +20,27 @@ export async function GET(req: Request) {
 
   const relations = await prisma.relationship.findMany({
     where: {
-      OR: [
-        { sourceEntity: { userId: uid } },
-        { targetEntity: { userId: uid } },
-      ],
+      sourceEntity: { userId: uid },
+      targetEntity: { userId: uid },
     },
-    select: { id: true, sourceEntityId: true, targetEntityId: true, relationshipType: true },
+    select: {
+      id: true,
+      sourceEntityId: true,
+      targetEntityId: true,
+      relationshipType: true,
+      documentId: true,
+      sourceEntity: { select: { id: true, name: true, type: true } },
+      targetEntity: { select: { id: true, name: true, type: true } },
+      document: {
+        select: {
+          id: true,
+          title: true,
+          type: true,
+          status: true,
+          createdAt: true,
+        },
+      },
+    },
   });
 
   const documentCount = await prisma.document.count({

@@ -12,7 +12,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const { id } = await params;
   const { answers } = await req.json();
-  // answers: [{ questionId: string, userAnswer: string }]
 
   if (!answers || !Array.isArray(answers)) {
     return NextResponse.json({ error: "Missing answers array" }, { status: 400 });
@@ -28,6 +27,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const questionMap = new Map(quiz.questions.map((q) => [q.id, q]));
     let totalPoints = 0;
     let correctPoints = 0;
+
+    const shortAnswerQuestions = answers.filter((a) => questionMap.get(a.questionId)?.type === "short_answer");
+    const otherAnswers = answers.filter((a) => questionMap.get(a.questionId)?.type !== "short_answer");
+
+    const shortAnswerGrades = await Promise.all(
+      shortAnswerQuestions.map(async (answer) => {
+        const question = questionMap.get(answer.questionId)!;
+        return gradeShortAnswer(question.question, question.correctAnswer, answer.userAnswer);
+      })
+    );
+
     const gradedAnswers: {
       questionId: string;
       userAnswer: string;
@@ -35,22 +45,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       aiFeedback: string | null;
     }[] = [];
 
-    for (const answer of answers) {
+    let saIdx = 0;
+    for (const answer of otherAnswers) {
       const question = questionMap.get(answer.questionId);
       if (!question) continue;
 
       let isCorrect = false;
-      let feedback: string | null = null;
       const points = 1;
       totalPoints += points;
 
-      if (question.type === "short_answer") {
-        const grade = await gradeShortAnswer(question.question, question.correctAnswer, answer.userAnswer);
-        isCorrect = grade.isCorrect;
-        feedback = grade.feedback;
-        totalPoints += 0;
-        correctPoints += grade.score / 100;
-      } else if (question.type === "true_false") {
+      if (question.type === "true_false") {
         isCorrect = answer.userAnswer.toLowerCase().trim() === question.correctAnswer.toLowerCase().trim();
         if (isCorrect) correctPoints += points;
       } else if (question.type === "fill_blank") {
@@ -65,7 +69,21 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         questionId: answer.questionId,
         userAnswer: answer.userAnswer,
         isCorrect,
-        aiFeedback: feedback,
+        aiFeedback: null,
+      });
+    }
+
+    for (const answer of shortAnswerQuestions) {
+      const grade = shortAnswerGrades[saIdx++];
+      const points = 1;
+      totalPoints += points;
+      correctPoints += grade.score / 100;
+
+      gradedAnswers.push({
+        questionId: answer.questionId,
+        userAnswer: answer.userAnswer,
+        isCorrect: grade.isCorrect,
+        aiFeedback: grade.feedback,
       });
     }
 

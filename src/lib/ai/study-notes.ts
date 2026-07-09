@@ -1,7 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+import { getChatModel, withRetry, withTimeout } from "@/lib/ai/client";
 
 const LEVEL_PROMPTS: Record<string, string> = {
   beginner: `Generate BEGINNER-level study notes. Use simple language, define all technical terms, and include helpful analogies. Structure with clear headings and bullet points.`,
@@ -38,10 +35,12 @@ Include:
 
 Output the notes directly in Markdown. Do NOT wrap in code blocks.`;
 
-  const result = await model.generateContent(prompt);
+  const result = await withRetry(
+    () => withTimeout(getChatModel().generateContent(prompt), "generateStudyNotes"),
+    "generateStudyNotes"
+  );
   const content = result.response.text();
 
-  // Extract title from first heading or generate one
   const titleMatch = content.match(/^#\s+(.+)/m);
   const title = titleMatch
     ? titleMatch[1].trim()

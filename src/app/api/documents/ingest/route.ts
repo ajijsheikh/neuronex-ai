@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { parsePDF, chunkText } from "@/lib/pdf";
 import { generateEmbedding, extractEntities } from "@/lib/ai";
 import { verifyFirebaseToken, extractBearerToken } from "@/lib/verify-token";
+
+const BATCH_SIZE = 5;
 
 export async function POST(req: Request) {
   const token = extractBearerToken(req.headers.get("authorization"));
@@ -40,17 +43,26 @@ export async function POST(req: Request) {
 
     const chunks = chunkText(text);
 
-    for (let i = 0; i < chunks.length; i++) {
-      const content = chunks[i];
-      const embedding = await generateEmbedding(content);
-      await prisma.$executeRawUnsafe(
-        `INSERT INTO "Chunk" (id, "documentId", content, embedding, "pageNumber", "createdAt")
-         VALUES ($1, $2, $3, $4::vector, $5, NOW())`,
-        crypto.randomUUID(),
-        document.id,
-        content,
-        `[${embedding.join(",")}]`,
-        null
+    for (let i = 0; i < chunks.length; i += BATCH_SIZE) {
+      const batch = chunks.slice(i, i + BATCH_SIZE);
+      const results = await Promise.all(
+        batch.map(async (content) => {
+          const embedding = await generateEmbedding(content);
+          return { content, embedding };
+        })
+      );
+      await Promise.all(
+        results.map(({ content, embedding }) =>
+          prisma.$executeRawUnsafe(
+            `INSERT INTO "Chunk" (id, "documentId", content, embedding, "pageNumber", "createdAt")
+             VALUES ($1, $2, $3, $4::vector, $5, NOW())`,
+            randomUUID(),
+            document.id,
+            content,
+            `[${embedding.join(",")}]`,
+            null
+          )
+        )
       );
     }
 
@@ -64,23 +76,28 @@ export async function POST(req: Request) {
       });
     }
 
-    for (const rel of extraction.relations) {
-      const sourceEntity = await prisma.entity.findFirst({
-        where: { userId: uid, name: rel.source },
+    if (extraction.relations.length > 0) {
+      const allNames = [...new Set(extraction.relations.flatMap((r) => [r.source, r.target]))];
+      const existingEntities = await prisma.entity.findMany({
+        where: { userId: uid, name: { in: allNames } },
       });
-      const targetEntity = await prisma.entity.findFirst({
-        where: { userId: uid, name: rel.target },
-      });
-      if (sourceEntity && targetEntity) {
-        await prisma.relationship.create({
-          data: {
-            sourceEntityId: sourceEntity.id,
-            targetEntityId: targetEntity.id,
-            relationshipType: rel.type,
-            documentId: document.id,
-          },
-        });
-      }
+      const entityByName = new Map(existingEntities.map((e) => [e.name, e]));
+
+      await Promise.all(
+        extraction.relations.map((rel) => {
+          const sourceEntity = entityByName.get(rel.source);
+          const targetEntity = entityByName.get(rel.target);
+          if (!sourceEntity || !targetEntity) return Promise.resolve();
+          return prisma.relationship.create({
+            data: {
+              sourceEntityId: sourceEntity.id,
+              targetEntityId: targetEntity.id,
+              relationshipType: rel.type,
+              documentId: document.id,
+            },
+          });
+        })
+      );
     }
 
     await prisma.document.update({

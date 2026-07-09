@@ -6,7 +6,7 @@ import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { getFirebaseAuth, getFirebaseStorage } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Upload, FileText, Image, X, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Upload, FileText, X, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
 interface FileEntry {
@@ -19,21 +19,17 @@ interface FileEntry {
 const ACCEPTED = {
   "application/pdf": [".pdf"],
   "text/plain": [".txt"],
-  "image/png": [".png"],
-  "image/jpeg": [".jpg", ".jpeg"],
-  "image/webp": [".webp"],
 };
 
 const MAX_SIZE = 10 * 1024 * 1024;
 
 function getFileType(name: string): string {
   if (name.endsWith(".pdf")) return "pdf";
-  if (name.endsWith(".txt")) return "txt";
-  return "image";
+  return "txt";
 }
 
-function getFileIcon(name: string) {
-  return name.endsWith(".pdf") || name.endsWith(".txt") ? FileText : Image;
+function getFileIcon(_name: string) {
+  return FileText;
 }
 
 export function Dropzone() {
@@ -123,7 +119,7 @@ export function Dropzone() {
               {isDragActive ? "Drop files here" : "Drag & drop files here"}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              PDF, TXT, PNG, JPG, WebP &middot; Max 10MB per file
+              PDF or TXT &middot; Max 10MB per file
             </p>
           </div>
           <Button variant="outline" size="sm" className="text-xs mt-2 pointer-events-none">
@@ -136,10 +132,6 @@ export function Dropzone() {
         <div className="flex items-center gap-2">
           <div className="h-1 w-1 rounded-full bg-muted-foreground" />
           <span>Documents: PDF, TXT</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="h-1 w-1 rounded-full bg-muted-foreground" />
-          <span>Images: PNG, JPG, WebP</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="h-1 w-1 rounded-full bg-muted-foreground" />

@@ -1,12 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-const model = genAI.getGenerativeModel({
-  model: "gemini-2.0-flash",
-  generationConfig: {
-    responseMimeType: "application/json",
-  },
-});
+import { getJsonModel, withRetry, withTimeout } from "@/lib/ai/client";
 
 export interface GeneratedFlashcard {
   front: string;
@@ -45,7 +37,10 @@ Output strictly as JSON:
   ]
 }`;
 
-  const result = await model.generateContent(prompt);
+  const result = await withRetry(
+    () => withTimeout(getJsonModel().generateContent(prompt), "generateFlashcards"),
+    "generateFlashcards"
+  );
   const text = result.response.text();
 
   try {
@@ -61,9 +56,6 @@ Output strictly as JSON:
   }
 }
 
-/**
- * Export flashcards to CSV format.
- */
 export function exportToCSV(
   flashcards: { front: string; back: string }[]
 ): string {
@@ -77,9 +69,6 @@ export function exportToCSV(
   return header + rows;
 }
 
-/**
- * Export flashcards to Anki-compatible tab-separated format.
- */
 export function exportToAnki(
   flashcards: { front: string; back: string }[]
 ): string {

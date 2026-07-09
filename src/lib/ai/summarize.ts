@@ -1,7 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+import { getChatModel, withRetry, withTimeout } from "@/lib/ai/client";
 
 export type SummaryType = "30sec" | "2min" | "5min" | "executive" | "exam";
 
@@ -46,12 +43,17 @@ ${config.instruction}
 
 Output the summary directly in Markdown. Do NOT wrap in code blocks.`;
 
-  const result = await model.generateContent({
-    contents: [{ role: "user", parts: [{ text: prompt }] }],
-    generationConfig: {
-      maxOutputTokens: config.maxTokens,
-    },
-  });
+  const result = await withRetry(
+    () =>
+      withTimeout(
+        getChatModel().generateContent({
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          generationConfig: { maxOutputTokens: config.maxTokens },
+        }),
+        "generateSummary"
+      ),
+    "generateSummary"
+  );
 
   return result.response.text();
 }

@@ -23,6 +23,7 @@ import {
   Activity,
   AlertTriangle,
   Map,
+  Upload,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -41,6 +42,7 @@ const navItems = [
   { href: "/dashboard/quiz", label: "Quiz Simulator", icon: Brain },
   { href: "/dashboard/flashcards", label: "Flashcards", icon: Layers },
   { href: "/dashboard/graph", label: "Knowledge Graph", icon: Share2 },
+  { href: "/dashboard/upload", label: "Upload", icon: Upload },
   { href: "/dashboard/mindmap", label: "Mind Map", icon: Network },
   { href: "/dashboard/tutor", label: "AI Tutor", icon: MessageCircle },
   { href: "/dashboard/health", label: "Knowledge Health", icon: Activity },

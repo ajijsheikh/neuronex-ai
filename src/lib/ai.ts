@@ -1,13 +1,14 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-
-const embeddingModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
-const chatModel = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+import { getEmbeddingModel, getChatModel, withRetry, withTimeout } from "@/lib/ai/client";
 
 export async function generateEmbedding(text: string): Promise<number[]> {
-  const result = await embeddingModel.embedContent(text);
-  return result.embedding.values;
+  return withRetry(
+    () =>
+      withTimeout(
+        getEmbeddingModel().embedContent(text).then((r) => r.embedding.values),
+        "generateEmbedding"
+      ),
+    "generateEmbedding"
+  );
 }
 
 export async function extractEntities(
@@ -22,7 +23,10 @@ export async function extractEntities(
 Text:
 ${text.slice(0, 8000)}`;
 
-  const result = await chatModel.generateContent(prompt);
+  const result = await withRetry(
+    () => withTimeout(getChatModel().generateContent(prompt), "extractEntities"),
+    "extractEntities"
+  );
   const response = result.response.text();
   const cleaned = response.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
   return JSON.parse(cleaned);
@@ -45,12 +49,18 @@ User Question: ${query}
 
 Answer:`;
 
-  const result = await chatModel.generateContent(prompt);
+  const result = await withRetry(
+    () => withTimeout(getChatModel().generateContent(prompt), "generateChatResponse"),
+    "generateChatResponse"
+  );
   return result.response.text();
 }
 
 export async function summarizeDocument(text: string): Promise<string> {
   const prompt = `Summarize the following document in 2-3 sentences:\n\n${text.slice(0, 10000)}`;
-  const result = await chatModel.generateContent(prompt);
+  const result = await withRetry(
+    () => withTimeout(getChatModel().generateContent(prompt), "summarizeDocument"),
+    "summarizeDocument"
+  );
   return result.response.text();
 }
